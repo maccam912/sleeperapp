@@ -2,8 +2,15 @@
 
 This repository contains a [Fresh](https://fresh.deno.dev) web application built
 with Deno that renders data from the [Sleeper](https://sleeper.com) fantasy
-football API. The home page lists rosters for league `1248432621554237440` and
-the `/players` route shows an alphabetical list of players.
+football API. The home page lists rosters for league `1248432621554237440`.
+Additional routes expose more league information:
+
+- `/players` – alphabetical list of NFL players
+- `/league` – basic info about the league
+- `/matchups` – week 1 matchups for the league
+
+Most Sleeper API endpoints are proxied through `/api/sleeper/*` which forwards
+requests to `https://api.sleeper.app/v1/`.
 
 ## Development
 

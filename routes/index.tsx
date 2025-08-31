@@ -25,6 +25,11 @@ export default function Home(
 ) {
   return (
     <main class="p-4 mx-auto max-w-screen-md">
+      <nav class="mb-4 space-x-4">
+        <a href="/players" class="underline">Players</a>
+        <a href="/league" class="underline">League Info</a>
+        <a href="/matchups" class="underline">Matchups</a>
+      </nav>
       <h1 class="text-2xl font-bold mb-4">League Rosters</h1>
       {data.rosters.map((roster) => (
         <div class="mb-6">
