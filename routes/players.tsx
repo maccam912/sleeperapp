@@ -1,34 +1,12 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
-
-interface Player {
-  id: string;
-  name: string;
-  position: string;
-  team: string | null;
-}
-
-interface RawPlayer {
-  player_id: string;
-  full_name: string;
-  position?: string;
-  team?: string;
-}
+import { buildPlayers, type Player } from "../lib/sleeper.ts";
 
 export const handler: Handlers<{ players: Player[] }> = {
   async GET(_req, ctx) {
     const res = await fetch("https://api.sleeper.app/v1/players/nfl");
-    const data = (await res.json()) as Record<string, RawPlayer>;
+    const data = await res.json();
 
-    const players: Player[] = Object.values(data)
-      .filter((p) => p.position)
-      .sort((a, b) => a.full_name.localeCompare(b.full_name))
-      .slice(0, 50)
-      .map((p) => ({
-        id: p.player_id,
-        name: p.full_name,
-        position: p.position!,
-        team: p.team ?? null,
-      }));
+    const players: Player[] = buildPlayers(data);
 
     return ctx.render({ players });
   },

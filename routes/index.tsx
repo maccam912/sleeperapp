@@ -1,9 +1,5 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
-
-interface Roster {
-  owner: string;
-  players: string[];
-}
+import { buildRosters, type Roster } from "../lib/sleeper.ts";
 
 export const handler: Handlers<{ rosters: Roster[] }> = {
   async GET(_req, ctx) {
@@ -18,23 +14,7 @@ export const handler: Handlers<{ rosters: Roster[] }> = {
     const playersData = await playersRes.json();
     const usersData = await usersRes.json();
 
-    const users = new Map(
-      usersData.map((u: { user_id: string; display_name: string }) => [
-        u.user_id,
-        u.display_name,
-      ]),
-    );
-
-    const rosters = rostersData.map((r: {
-      roster_id: number;
-      owner_id: string;
-      players: string[];
-    }) => ({
-      owner: users.get(r.owner_id) ?? `Roster ${r.roster_id}`,
-      players: (r.players ?? []).map(
-        (id: string) => playersData[id]?.full_name ?? id,
-      ),
-    }));
+    const rosters = buildRosters(rostersData, playersData, usersData);
 
     return ctx.render({ rosters });
   },
