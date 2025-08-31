@@ -1,7 +1,9 @@
 # Sleeperapp
 
-This repository contains a minimal [Fresh](https://fresh.deno.dev) web
-application built with Deno.
+This repository contains a [Fresh](https://fresh.deno.dev) web application built
+with Deno that renders data from the [Sleeper](https://sleeper.com) fantasy
+football API. The home page lists rosters for league `1248432621554237440` and
+the `/players` route shows an alphabetical list of players.
 
 ## Development
 
