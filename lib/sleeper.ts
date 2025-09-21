@@ -50,7 +50,10 @@ export interface Player {
 export function buildPlayers(data: Record<string, RawPlayer>): Player[] {
   return Object.values(data)
     // Ensure we only include well-formed player objects with a name and position
-    .filter((p) => !!p && !!p.position && typeof p.full_name === "string" && p.full_name.length > 0)
+    .filter((p) =>
+      !!p && !!p.position && typeof p.full_name === "string" &&
+      p.full_name.length > 0
+    )
     .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""))
     .slice(0, 50)
     .map((p) => ({

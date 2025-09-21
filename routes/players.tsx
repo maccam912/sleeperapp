@@ -30,7 +30,9 @@ export const handler: Handlers<{
   async GET(_req, ctx) {
     const url = new URL(_req.url);
     const modeParam = (url.searchParams.get("view") ?? "").toLowerCase();
-    const mode = (modeParam === "week" || modeParam === "proj") ? modeParam : "proj";
+    const mode = (modeParam === "week" || modeParam === "proj")
+      ? modeParam
+      : "proj";
     const weekParam = url.searchParams.get("week");
 
     // Fetch base player info
@@ -47,7 +49,9 @@ export const handler: Handlers<{
       if (stateRes.ok) {
         const state: SleeperState = await stateRes.json();
         if (state.season && /^\d{4}$/.test(state.season)) season = state.season;
-        if (typeof state.week === "number" && isFinite(state.week)) currentWeek = state.week;
+        if (typeof state.week === "number" && isFinite(state.week)) {
+          currentWeek = state.week;
+        }
         const st = (state.season_type ?? "regular").toLowerCase();
         if (st === "pre" || st === "regular" || st === "post") seasonType = st;
       }
@@ -67,11 +71,14 @@ export const handler: Handlers<{
     if (!Number.isFinite(week) || week < 1) week = 1;
 
     // Decide endpoint based on mode
-    let endpoint = `https://api.sleeper.com/stats/nfl/${season}?season_type=${seasonType}`;
+    let endpoint =
+      `https://api.sleeper.com/stats/nfl/${season}?season_type=${seasonType}`;
     if (mode === "week") {
-      endpoint = `https://api.sleeper.com/stats/nfl/${season}/${week}?season_type=${seasonType}`;
+      endpoint =
+        `https://api.sleeper.com/stats/nfl/${season}/${week}?season_type=${seasonType}`;
     } else if (mode === "proj") {
-      endpoint = `https://api.sleeper.com/projections/nfl/${season}/${week}?season_type=${seasonType}`;
+      endpoint =
+        `https://api.sleeper.com/projections/nfl/${season}/${week}?season_type=${seasonType}`;
     }
 
     const statsRes = await fetch(endpoint);
@@ -127,17 +134,31 @@ export const handler: Handlers<{
 };
 
 export default function PlayersPage(
-  { data }: PageProps<{ players: PlayerWithStats[]; season: string; mode: "season" | "week" | "proj"; week?: number; seasonType: "pre" | "regular" | "post" }>,
+  { data }: PageProps<
+    {
+      players: PlayerWithStats[];
+      season: string;
+      mode: "season" | "week" | "proj";
+      week?: number;
+      seasonType: "pre" | "regular" | "post";
+    }
+  >,
 ) {
   return (
     <main class="p-4 mx-auto max-w-screen-md">
       <h1 class="text-2xl font-bold mb-4">Players</h1>
       <nav class="mb-3 space-x-3 text-sm">
         <a href="/players" class="underline">Season {data.season}</a>
-        <a href={`/players?view=week${data.week ? `&week=${data.week}` : ""}`} class="underline">
+        <a
+          href={`/players?view=week${data.week ? `&week=${data.week}` : ""}`}
+          class="underline"
+        >
           Week {data.week ?? "?"}
         </a>
-        <a href={`/players?view=proj${data.week ? `&week=${data.week}` : ""}`} class="underline">
+        <a
+          href={`/players?view=proj${data.week ? `&week=${data.week}` : ""}`}
+          class="underline"
+        >
           Week {data.week ?? "?"} Proj
         </a>
       </nav>
@@ -146,14 +167,21 @@ export default function PlayersPage(
           <>Showing season-to-date PPR for {data.season} ({data.seasonType}).</>
         )}
         {data.mode === "week" && data.week && (
-          <>Showing Week {data.week} PPR for {data.season} ({data.seasonType}).</>
+          <>
+            Showing Week {data.week} PPR for {data.season} ({data.seasonType}).
+          </>
         )}
         {data.mode === "proj" && data.week && (
-          <>Showing Week {data.week} projected PPR for {data.season} ({data.seasonType}).</>
+          <>
+            Showing Week {data.week} projected PPR for {data.season}{" "}
+            ({data.seasonType}).
+          </>
         )}
       </p>
       {data.players.length === 0 && (
-        <p class="text-sm text-gray-600">No player stats found for this view. Try switching views or week.</p>
+        <p class="text-sm text-gray-600">
+          No player stats found for this view. Try switching views or week.
+        </p>
       )}
       {data.players.length > 0 && (
         <ul class="space-y-1">
