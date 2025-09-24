@@ -47,6 +47,59 @@ Example Claude/MCP WebSocket config (conceptual):
 Once connected, the client can call `tools/list` to discover available tools and
 use `tools/call` with the tool `name` and `arguments` to query data.
 
+### MCP over SSE
+
+For browser/SSE transports, an EventSource-based endpoint is available:
+
+- SSE stream (server -> client): `GET /sse`
+- Send messages (client -> server): `POST /sse?session=<id>` or header
+  `x-session-id: <id>`
+
+Flow:
+
+- Open `GET /sse` with `EventSource`. The server emits a `message` event with a
+  session id (method: `notifications/session`) and a `notifications/ready` note.
+- Post JSON-RPC 2.0 messages to `/sse` including the `session` query param (or
+  `x-session-id` header). Responses arrive on the SSE stream as `message`
+  events.
+
+Example (browser):
+
+```js
+const es = new EventSource("/sse");
+let sessionId;
+es.addEventListener("message", (ev) => {
+  const msg = JSON.parse(ev.data);
+  if (msg?.method === "notifications/session") {
+    sessionId = msg.params.session;
+    // initialize
+    fetch(`/sse?session=${sessionId}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {},
+      }),
+    });
+  }
+  // handle other MCP responses
+});
+
+// later, call a tool
+fetch(`/sse?session=${sessionId}`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    jsonrpc: "2.0",
+    id: 2,
+    method: "tools/call",
+    params: { name: "league_info", arguments: {} },
+  }),
+});
+```
+
 ## Development
 
 Run the development server:
