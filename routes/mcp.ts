@@ -76,11 +76,14 @@ export const handler: Handlers = {
               break;
             }
             case "tools/call": {
-              const name = String((params as any).name ?? "");
-              const args = ((params as any).arguments ?? {}) as Record<
-                string,
-                unknown
-              >;
+              const nameVal = (params as { name?: unknown }).name;
+              const argsVal = (params as { arguments?: unknown }).arguments;
+              const name = typeof nameVal === "string"
+                ? nameVal
+                : String(nameVal ?? "");
+              const args = (argsVal && typeof argsVal === "object")
+                ? argsVal as Record<string, unknown>
+                : {};
               const result = await callTool(name, args);
               const resp = ok(id, result);
               socket.send(JSON.stringify(resp));

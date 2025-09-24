@@ -37,55 +37,93 @@ export function err(
   return { jsonrpc: "2.0", id, error: { code, message, data } };
 }
 
-export function toolsList() {
-  return {
-    tools: [
-      {
-        name: "league_info",
-        description:
-          "Get basic Sleeper league info (name, season, total rosters).",
-        inputSchema: {
-          type: "object",
-          properties: {
-            leagueId: { type: "string", description: "Sleeper league id" },
-          },
-          required: [],
-        },
-      },
-      {
-        name: "matchups",
-        description: "Get matchups for a given league and week.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            leagueId: { type: "string", description: "Sleeper league id" },
-            week: { type: "number", description: "NFL week (1-18)" },
-          },
-          required: ["week"],
-        },
-      },
-      {
-        name: "player_search",
-        description:
-          "Search NFL players by substring. Returns basic info and optional PPR projection if available.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: { type: "string", description: "Substring of player name" },
-            limit: { type: "number", description: "Max results (default 20)" },
-          },
-          required: ["query"],
-        },
-      },
-    ],
-  };
+export interface MCPTextContent {
+  type: "text";
+  text: string;
+}
+export interface CallToolResult {
+  content: MCPTextContent[];
+  isError: boolean;
 }
 
-export async function callTool(name: string, args: Record<string, unknown>) {
+export interface JSONSchema {
+  type: string;
+  properties?: Record<
+    string,
+    JSONSchema | { type: string; description?: string }
+  >;
+  required?: string[];
+  description?: string;
+}
+
+export interface ToolSpec {
+  name: string;
+  description: string;
+  inputSchema: JSONSchema;
+}
+
+export function toolsList(): { tools: ToolSpec[] } {
+  const tools: ToolSpec[] = [
+    {
+      name: "league_info",
+      description:
+        "Get basic Sleeper league info (name, season, total rosters).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          leagueId: { type: "string", description: "Sleeper league id" },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "matchups",
+      description: "Get matchups for a given league and week.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          leagueId: { type: "string", description: "Sleeper league id" },
+          week: { type: "number", description: "NFL week (1-18)" },
+        },
+        required: ["week"],
+      },
+    },
+    {
+      name: "player_search",
+      description:
+        "Search NFL players by substring. Returns basic info and optional PPR projection if available.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Substring of player name" },
+          limit: { type: "number", description: "Max results (default 20)" },
+        },
+        required: ["query"],
+      },
+    },
+  ];
+  return { tools };
+}
+
+export interface LeagueResponse {
+  name?: string;
+  season?: string;
+  total_rosters?: number;
+}
+export interface Matchup {
+  matchup_id: number;
+  roster_id: number;
+  points?: number;
+}
+
+export async function callTool(
+  name: string,
+  args: Record<string, unknown>,
+): Promise<CallToolResult> {
   switch (name) {
     case "league_info": {
       const leagueId = String(args.leagueId ?? DEFAULT_LEAGUE_ID);
-      const data = await fetchJson<any>(
+      const data = await fetchJson<LeagueResponse>(
         `https://api.sleeper.app/v1/league/${leagueId}`,
       );
       const result = {
@@ -111,7 +149,7 @@ export async function callTool(name: string, args: Record<string, unknown>) {
           isError: true,
         };
       }
-      const data = await fetchJson<any[]>(
+      const data = await fetchJson<Matchup[]>(
         `https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`,
       );
       return {
