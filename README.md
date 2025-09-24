@@ -17,12 +17,14 @@ requests to `https://api.sleeper.app/v1/`.
 This app exposes an MCP server over WebSocket so compatible LLM clients can
 connect and use Sleeper lookups as tools.
 
-- WebSocket URL: `ws://localhost:8000/mcp` (dev) or `wss://<your-host>/mcp` (prod)
+- WebSocket URL: `ws://localhost:8000/mcp` (dev) or `wss://<your-host>/mcp`
+  (prod)
 - Subprotocol: `mcp`
 - Supported methods: `initialize`, `tools/list`, `tools/call`
 - Tools:
   - `league_info` — Get basic league info. Args: `{ leagueId?: string }`
-  - `matchups` — Get matchups for a week. Args: `{ week: number, leagueId?: string }`
+  - `matchups` — Get matchups for a week. Args:
+    `{ week: number, leagueId?: string }`
   - `player_search` — Search players. Args: `{ query: string, limit?: number }`
 
 Optional env var:
@@ -51,6 +53,14 @@ Run the development server:
 
 ```sh
 deno task start
+```
+
+### Testing
+
+Run the test suite (includes MCP tool tests with mocked HTTP):
+
+```sh
+deno task test
 ```
 
 ## Docker
