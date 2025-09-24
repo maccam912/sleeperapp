@@ -12,6 +12,39 @@ Additional routes expose more league information:
 Most Sleeper API endpoints are proxied through `/api/sleeper/*` which forwards
 requests to `https://api.sleeper.app/v1/`.
 
+## MCP Server (Model Context Protocol)
+
+This app exposes an MCP server over WebSocket so compatible LLM clients can
+connect and use Sleeper lookups as tools.
+
+- WebSocket URL: `ws://localhost:8000/mcp` (dev) or `wss://<your-host>/mcp` (prod)
+- Subprotocol: `mcp`
+- Supported methods: `initialize`, `tools/list`, `tools/call`
+- Tools:
+  - `league_info` — Get basic league info. Args: `{ leagueId?: string }`
+  - `matchups` — Get matchups for a week. Args: `{ week: number, leagueId?: string }`
+  - `player_search` — Search players. Args: `{ query: string, limit?: number }`
+
+Optional env var:
+
+- `DEFAULT_LEAGUE_ID` — Default league used when a tool omits `leagueId`.
+
+Example Claude/MCP WebSocket config (conceptual):
+
+```json
+{
+  "mcpServers": {
+    "sleeper": {
+      "type": "websocket",
+      "url": "ws://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+Once connected, the client can call `tools/list` to discover available tools and
+use `tools/call` with the tool `name` and `arguments` to query data.
+
 ## Development
 
 Run the development server:
