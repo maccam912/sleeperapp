@@ -14,7 +14,17 @@ export interface JsonRpcResponse {
   error?: { code: number; message: string; data?: unknown };
 }
 
-export const DEFAULT_LEAGUE_ID = Deno.env.get("DEFAULT_LEAGUE_ID") ??
+function safeEnv(name: string): string | undefined {
+  try {
+    // Accessing env may require permission; handle gracefully for tests
+    // without --allow-env.
+    return Deno.env.get(name);
+  } catch {
+    return undefined;
+  }
+}
+
+export const DEFAULT_LEAGUE_ID = safeEnv("DEFAULT_LEAGUE_ID") ??
   "1248432621554237440";
 export const PROTOCOL_VERSION = "2024-11-05";
 
